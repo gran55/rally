@@ -1,0 +1,21 @@
+import pygame as pg
+
+SIZE = WIDTH, HEIGHT =1280, 720 
+
+pg.init()
+pg.display.set_caption('загадка про жака фреско')
+screen = pg.display.set_mode(SIZE)
+
+bg_image = pg.image.load('загадка .jpg')
+bg_image_rect = bg_image.get_rect(topleft=(0, 0))
+bg_image_2_rect = bg_image.get_rect(topleft=(0, -HEIGHT))
+
+game = True
+while game:
+    for e in pg.event.get():
+        if e.type == pg.QUIT:
+            game = False
+
+
+    screen.blit(bg_image, bg_image_rect)
+    pg.display.update()
