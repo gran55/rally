@@ -16,6 +16,9 @@ screen = pg.display.set_mode(SIZE)
 
 FPS = 120
 clock = pg.time.Clock()
+car_accident = 0
+block = False
+life = 3
 '''
 bg_image = pg.image.load('Image/road.jpg')
 bg_image_rect = bg_image.get_rect(topleft=(0, 0))
@@ -23,6 +26,8 @@ bg_image_2_rect = bg_image.get_rect(topleft=(0, -HEIGHT))
 '''
 cars = [pg.image.load('Image/car1.png'), pg.image.load('Image/car2.png'),
         pg.image.load('Image/car3.png')]
+sound_car_accident = pg.mixer.Sound('sound/udar.wav')
+font = pg.font.Font(None, 32)
 
 class Player(pg.sprite.Sprite):
     def __init__(self):
@@ -49,8 +54,8 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_RIGHT]:
            self.velocity.x = self.speed
            self.angle -= 1
-           if self.angle > -25:
-               self.angle = 25
+           if self.angle < -25:
+               self.angle = -25
         elif keys[pg.K_LEFT]:
             self.velocity.x = -self.speed
             self.angle += 1
@@ -135,6 +140,7 @@ class Car(pg.sprite.Sprite):
 
 
 all_sprite = pg.sprite.Group()
+cars_group = pg.sprite.Group()
 for r in range(2):
     all_sprite.add(Road(0, 0 if r == 0 else -HEIGHT))
 
@@ -146,11 +152,11 @@ while n < 6:
         continue
     else:
         list_x.append(x)
-        all_sprite.add(Car(x, -cars[0].get_height(), cars[n] if n < len(cars) else random.choice(cars)))
+        cars_group.add(Car(x, -cars[0].get_height(), cars[n] if n < len(cars) else random.choice(cars)))
         n += 1
 
 player = Player()
-all_sprite.add(player)
+all_sprite.add(player, cars_group)
 
 game = True
 while game:
@@ -161,6 +167,18 @@ while game:
             if e.button == 1:
                 #if c.collidepoint(e.pos):
                     block = False
+
+    if pg.sprite.spritecollideany(player, cars_group):
+        if block is False:
+            player.position[0] += 50 * random.randrange(-1, 2, 2)
+            player.angle = 50 * random.randrange(-2, 2, 2)
+            car_accident += 1
+            #life -= 1
+            block = True
+            if life <= 0:
+                game = False
+else:
+    block = False
     '''
     car1.y -= 1
     if car1.y < -car1_h:
@@ -178,8 +196,13 @@ while game:
         screen.blit(bg_image, bg_image_rect if i == 0 else bg_image_2_rect)
     screen.blit(car1_image, (car1.x, car1.y))
     '''
+    time += 0.0001
+
+
     all_sprite.update()
     all_sprite.draw(screen)
+    screen.blit(font.render('Кол-во аварий = {car_accident}', True, GREEN),(45, 10))
+    screen.blit(font.render(f';bpyb'))
 
     pg.display.update()
     clock.tick(FPS)
